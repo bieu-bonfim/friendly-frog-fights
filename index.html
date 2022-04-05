@@ -1,25 +1,94 @@
+<head>
+  <link rel="stylesheet" href="css/style.css">
+</head>
 <body>
-  
-<div>
-  <div>
-    <!-- Player Health -->
-    <div>
+  <!-- Main div -->
+  <div style="
+  position: relative; 
+  display: inline-block;
+  ">
 
+    <!-- Sub div -->
+    <div style="
+    position: absolute; 
+    display: flex; 
+    width: 100%; 
+    align-items: center;
+    padding: 15px 30px;
+    ">
+
+      <!-- Player Health -->
+      <div style="
+      position: relative; 
+      height: 30px; 
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;">
+        <div style="
+        background-color: gray;
+        height: 30px;
+        width: 100%;"
+        ></div>
+        <div style="
+        position: absolute; 
+        background-color: yellowgreen; 
+        top: 0; 
+        right: 0; 
+        bottom: 0;
+        width: 100%;"
+        id="player-health"></div>
+      </div>
+
+      <!-- Timer -->
+      <div style="
+      background-color: yellow; 
+      height: 100px; 
+      width: 100px; 
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;"
+      id="timer">
+      10
+      </div>
+
+      <!-- Enemy Health -->
+      <div style="
+      position: relative; 
+      height: 30px; 
+      width: 100%;">
+        <div style="
+        background-color: gray;
+        height: 30px;"
+        ></div>
+        <div style="
+        position: absolute; 
+        background-color: yellowgreen; 
+        top: 0; 
+        right: 0; 
+        bottom: 0; 
+        left: 0;"
+        id="enemy-health"></div>
+      </div>
     </div>
 
-    <!-- Timer -->
-    <div>
+    <!-- Results div -->
+    <div style="
+    position: absolute; 
+    color: white;  
+    align-items: center; 
+    justify-content: center;
+    top: 0; 
+    right: 0; 
+    bottom: 0; 
+    left: 0;
+    display: none;"
+    id="results">Tie</div>
 
-    </div>
-
-    <!-- Enemy Health -->
-    <div>
-      
-    </div>
+    <canvas></canvas>
   </div>
-  <canvas>
-  </canvas>
-</div>
 
+  <script src="js/classes/Character.js"></script>
+  <script src="js/classes/Sprite.js"></script>
   <script src="index.js"></script>
 </body>
