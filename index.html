@@ -1,93 +1,120 @@
 <head>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Righteous&display=swap"
+    rel="stylesheet"
+  />
 </head>
 <body>
   <!-- Main div -->
-  <div style="
-  position: relative; 
-  display: inline-block;
-  ">
-
+  <div style="position: relative; display: inline-block">
     <!-- Sub div -->
-    <div style="
-    position: absolute; 
-    display: flex; 
-    width: 100%; 
-    align-items: center;
-    padding: 15px 30px;
-    ">
-
+    <div
+      style="
+        position: absolute;
+        display: flex;
+        width: 100%;
+        align-items: center;
+        padding: 15px 30px;
+      "
+    >
       <!-- Player Health -->
-      <div style="
-      position: relative; 
-      height: 30px; 
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;">
-        <div style="
-        background-color: gray;
-        height: 30px;
-        width: 100%;"
+      <div
+        style="
+          position: relative;
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          border-top: 4px solid #000;
+          border-left: 4px solid #000;
+          border-bottom: 4px solid #000;
+        "
+      >
+        <div style="background-color: #8c0808; height: 30px; width: 100%"></div>
+        <div
+          style="
+            position: absolute;
+            background-color: #85ef47;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+          "
+          id="player-health"
         ></div>
-        <div style="
-        position: absolute; 
-        background-color: yellowgreen; 
-        top: 0; 
-        right: 0; 
-        bottom: 0;
-        width: 100%;"
-        id="player-health"></div>
       </div>
 
       <!-- Timer -->
-      <div style="
-      background-color: yellow; 
-      height: 100px; 
-      width: 100px; 
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;"
-      id="timer">
-      10
-      </div>
+      <div
+        style="
+          background-color: #207dff;
+          height: 60px;
+          width: 80px;
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 4px solid #000;
+          font-family: 'Righteous', cursive;
+        "
+        id="timer"
+      ></div>
 
       <!-- Enemy Health -->
-      <div style="
-      position: relative; 
-      height: 30px; 
-      width: 100%;">
-        <div style="
-        background-color: gray;
-        height: 30px;"
+      <div
+        style="
+          position: relative;
+          width: 100%;
+          border-top: 4px solid #000;
+          border-right: 4px solid #000;
+          border-bottom: 4px solid #000;
+        "
+      >
+        <div style="background-color: #8c0808; height: 30px"></div>
+        <div
+          style="
+            position: absolute;
+            background-color: #85ef47;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+          "
+          id="enemy-health"
         ></div>
-        <div style="
-        position: absolute; 
-        background-color: yellowgreen; 
-        top: 0; 
-        right: 0; 
-        bottom: 0; 
-        left: 0;"
-        id="enemy-health"></div>
       </div>
     </div>
 
     <!-- Results div -->
-    <div style="
-    position: absolute; 
-    color: white;  
-    align-items: center; 
-    justify-content: center;
-    top: 0; 
-    right: 0; 
-    bottom: 0; 
-    left: 0;
-    display: none;"
-    id="results">Tie</div>
+    <div
+      style="
+        position: absolute;
+        color: white;
+        align-items: center;
+        justify-content: center;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: none;
+        font-family: 'Righteous', cursive;
+        font-size: 48px;
+      "
+      id="results"
+    >
+      Tie
+    </div>
 
     <canvas></canvas>
   </div>
-
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"
+    integrity="sha512-H6cPm97FAsgIKmlBA4s774vqoN24V5gSQL4yBTDOY2su2DeXZVhQPxFK4P6GPdnZqM9fg1G3cMv5wD7e6cFLZQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
   <script src="js/utils.js"></script>
   <script src="js/classes/Sprite.js"></script>
   <script src="js/classes/Character.js"></script>

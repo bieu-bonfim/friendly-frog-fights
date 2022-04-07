@@ -63,6 +63,14 @@ const player = new Character({
     attack1: {
       imageSrc: './img/samuraiMack/Attack1.png',
       framesMax: 6,
+    },
+    takeHit: {
+      imageSrc: './img/samuraiMack/takeHit.png',
+      framesMax: 4,
+    },
+    death: {
+      imageSrc: './img/samuraiMack/Death.png',
+      framesMax: 6,
     }
   },
   framesHold: 5,
@@ -73,7 +81,7 @@ const player = new Character({
     },
     width: 180,
     height: 80
-  }
+  },
 });
 
 player.draw();
@@ -114,6 +122,14 @@ const enemy = new Character({
     attack1: {
       imageSrc: './img/kenji/Attack1.png',
       framesMax: 4,
+    },
+    takeHit: {
+      imageSrc: './img/kenji/takeHit.png',
+      framesMax: 3,
+    },
+    death: {
+      imageSrc: './img/kenji/Death.png',
+      framesMax: 7,
     }
   },
   attackBox: {
@@ -123,7 +139,7 @@ const enemy = new Character({
     },
     width: 180,
     height: 80
-  }
+  },
 });
 
 enemy.draw();
@@ -155,67 +171,74 @@ function animate() {
   c.fillRect(0, 0, canvas.width, canvas.height);
   background.update();
   shop.update();
+  c.fillStyle = 'rgba(255, 255, 255, 0.15)';
+  c.fillRect(0, 0, canvas.width, canvas.height);
   player.update();
   enemy.update();
 
   // Player Movement
   player.velocity.x = 0;
-  if (keys.a.pressed == true && player.lastkey == 'a') {
-    player.switchSprite('run');
-    player.velocity.x = -3.5;
-  } else if (keys.d.pressed == true && player.lastkey == 'd') {
-    player.switchSprite('run');
-    player.velocity.x = 3.5;
-  } else if (keys.d.pressed == true) {
-    player.switchSprite('run');
-    player.velocity.x = 3.5;
-  } else if (keys.a.pressed == true) {
-    player.switchSprite('run');
-    player.velocity.x = -3.5;
-  } else {
-    player.switchSprite('idle');
-  }
-
-  if (keys.w.pressed == true && player.velocity.y == 0) {
-    player.velocity.y = -10;
-  }
-
-  if (player.velocity.y < 0) {
-    player.switchSprite('jump');
-  } else if (player.velocity.y > 0) {
-    player.switchSprite('fall');
-  }
-
+  if (!player.dead) {
+    if (keys.a.pressed == true && player.lastkey == 'a') {
+      player.switchSprite('run');
+      player.velocity.x = -3.5;
+    } else if (keys.d.pressed == true && player.lastkey == 'd') {
+      player.switchSprite('run');
+      player.velocity.x = 3.5;
+    } else if (keys.d.pressed == true) {
+      player.switchSprite('run');
+      player.velocity.x = 3.5;
+    } else if (keys.a.pressed == true) {
+      player.switchSprite('run');
+      player.velocity.x = -3.5;
+    } else {
+      player.switchSprite('idle');
+    }
   
-
+    if (keys.w.pressed == true && player.velocity.y == 0) {
+      player.velocity.y = -10;
+    }
+  
+    if (player.velocity.y < 0) {
+      player.switchSprite('jump');
+    } else if (player.velocity.y > 0) {
+      player.switchSprite('fall');
+    }
+  } else {
+    player.velocity.x = 0;
+  }
 
   // Enemy Movement
 
-  enemy.velocity.x = 0;
-  if (keys.ArrowLeft.pressed == true && enemy.lastkey == 'ArrowLeft') {
-    enemy.switchSprite('run');
-    enemy.velocity.x = -3.5;
-  } else if (keys.ArrowRight.pressed == true && enemy.lastkey == 'ArrowRight') {
-    enemy.switchSprite('run');
-    enemy.velocity.x = 3.5;
-  } else if (keys.ArrowRight.pressed == true) {
-    enemy.switchSprite('run');
-    enemy.velocity.x = 3.5;
-  } else if (keys.ArrowLeft.pressed == true) {
-    enemy.switchSprite('run');
-    enemy.velocity.x = -3.5;
-  }else {
-    enemy.switchSprite('idle');
-  }
+  if (!enemy.dead) {
+    enemy.velocity.x = 0;
+    if (keys.ArrowLeft.pressed == true && enemy.lastkey == 'ArrowLeft') {
+      enemy.switchSprite('run');
+      enemy.velocity.x = -3.5;
+    } else if (keys.ArrowRight.pressed == true && enemy.lastkey == 'ArrowRight') {
+      enemy.switchSprite('run');
+      enemy.velocity.x = 3.5;
+    } else if (keys.ArrowRight.pressed == true) {
+      enemy.switchSprite('run');
+      enemy.velocity.x = 3.5;
+    } else if (keys.ArrowLeft.pressed == true) {
+      enemy.switchSprite('run');
+      enemy.velocity.x = -3.5;
+    }else {
+      enemy.switchSprite('idle');
+    }
 
-  if (keys.ArrowUp.pressed == true && enemy.velocity.y == 0) {
-    enemy.velocity.y = -10;
-  }
+    if (keys.ArrowUp.pressed == true && enemy.velocity.y == 0) {
+      enemy.velocity.y = -10;
+    }
 
-  if (enemy.velocity.y < 0) {
-    enemy.switchSprite('jump');
-  } else if (enemy.velocity.y > 0) {
-    enemy.switchSprite('fall');
+    if (enemy.velocity.y < 0) {
+      enemy.switchSprite('jump');
+    } else if (enemy.velocity.y > 0) {
+      enemy.switchSprite('fall');
+    }
+  } else {
+    enemy.velocity.x = 0;
   }
 
   // Colisions
@@ -229,9 +252,11 @@ function animate() {
     player.isAttacking &&
     player.framesCurrent === 4
   ) {
+    enemy.takeHit();
     player.isAttacking = false;
-    enemy.health -= 20;
-    document.querySelector('#enemy-health').style.width = enemy.health+'%';
+    gsap.to('#enemy-health', {
+      width: enemy.health+'%'
+    });
   }
 
   // Missed
@@ -251,9 +276,11 @@ function animate() {
     enemy.isAttacking &&
     enemy.framesCurrent === 2
   ) {
+    player.takeHit();
     enemy.isAttacking = false;
-    player.health -= 20;
-    document.querySelector('#player-health').style.width = player.health+'%';
+    gsap.to('#player-health', {
+      width: player.health+'%'
+    });
   }
 
   // Missed

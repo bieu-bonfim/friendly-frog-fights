@@ -36,6 +36,7 @@ class Character extends Sprite {
     this.framesCurrent = 0;
     this.framesElapsed = 0;
     this.sprites = sprites;
+    this.dead = false;
 
     for (const i in this.sprites) {
       sprites[i].image = new Image();
@@ -45,7 +46,9 @@ class Character extends Sprite {
 
   update() {
     this.draw();
-    this.animateFrames();
+    if(!this.dead) {
+      this.animateFrames();
+    }
     this.attackBox.position.x = this.position.x + this.attackBox.offset.x;
     this.attackBox.position.y = this.position.y + this.attackBox.offset.y;
 
@@ -69,10 +72,35 @@ class Character extends Sprite {
     this.isAttacking = true;
   }
 
+  takeHit() {
+    this.health -= 20;
+    if (this.health <= 0) {
+      this.switchSprite('death');
+    } else {
+      this.switchSprite('takeHit');
+    }
+  }
+
   switchSprite(sprite) {
+    // Overriding all animations with death animation
+    if (
+      this.image === this.sprites.death.image
+    ) {
+      if (this.framesCurrent === this.sprites.death.framesMax - 1) {
+        this.dead = true;
+      }
+      return;
+    }
+    // Overriding all animations with attack animation
     if (
       this.image === this.sprites.attack1.image &&
       this.framesCurrent < this.sprites.attack1.framesMax - 1
+    )
+      return;
+    // Overriding all animations with take hit animation
+    if (
+      this.image === this.sprites.takeHit.image &&
+      this.framesCurrent < this.sprites.takeHit.framesMax -1
     )
       return;
     switch (sprite) {
@@ -111,6 +139,20 @@ class Character extends Sprite {
           this.framesCurrent = 0;
         }
         break;
+      case "takeHit":
+        if (this.image !== this.sprites.takeHit.image) {
+          this.framesMax = this.sprites.takeHit.framesMax;
+          this.image = this.sprites.takeHit.image;
+          this.framesCurrent = 0;
+        }
+        break;
+      case "death":
+        if (this.image !== this.sprites.death.image) {
+          this.framesMax = this.sprites.death.framesMax;
+          this.image = this.sprites.death.image;
+          this.framesCurrent = 0;
+        }
+        break; 
       default:
         break;
     }
