@@ -1,6 +1,8 @@
 class Character extends Sprite {
   constructor({
     position,
+    width,
+    height,
     velocity,
     imageSrc,
     scale = 1,
@@ -8,10 +10,13 @@ class Character extends Sprite {
     offset = { x: 0, y: 0 },
     sprites,
     framesHold,
-    attackBox = {offset: {}, width: undefined, height: undefined}
+    attackBox = {offset: {}, width: undefined, height: undefined},
+    stats = {health: 100, damage: 20, speed: 60, jump: 50, jumpQuantity: 1}
   }) {
     super({
       position,
+      width,
+      height,
       imageSrc,
       scale,
       framesMax,
@@ -19,8 +24,6 @@ class Character extends Sprite {
       framesHold,
     });
     this.velocity = velocity;
-    this.height = 150;
-    this.width = 50;
     this.lastkey;
     this.attackBox = {
       position: {
@@ -31,12 +34,18 @@ class Character extends Sprite {
       width: attackBox.width,
       height: attackBox.height,
     };
-    this.isAttacking;
-    this.health = 100;
+    this.isAttacking = false;
+    this.health = stats.health;
     this.framesCurrent = 0;
     this.framesElapsed = 0;
     this.sprites = sprites;
     this.dead = false;
+    this.stats = stats;
+
+    this.canAttack = true;
+
+    this.spriteLoop = 0;
+    this.spriteHold = 0;
 
     for (const i in this.sprites) {
       sprites[i].image = new Image();
@@ -53,7 +62,18 @@ class Character extends Sprite {
     this.attackBox.position.y = this.position.y + this.attackBox.offset.y;
 
     // Attack box
-    // c.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height);
+    if (debug) {
+      c.fillStyle = 'rgba(255, 0, 0, 0.35)';
+      c.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height);
+      if (debug && this.framesCurrent == this.sprites.attack1.attackFrame ) {
+        c.fillStyle = 'rgba(0, 255, 0, 0.35)';
+        c.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height);
+      }
+    }
+    if (debug) {
+      c.fillStyle = 'rgba(255, 0, 0, 0.35)';
+      c.fillRect(this.position.x, this.position.y, this.width, this.height);
+    }
 
     this.position.y += this.velocity.y;
     this.position.x += this.velocity.x;
@@ -61,7 +81,7 @@ class Character extends Sprite {
     // velocity is not needed
     if (this.position.y + this.height + this.velocity.y >= canvas.height - 96) {
       this.velocity.y = 0;
-      this.position.y = 330;
+      this.position.y = 330 + (150-this.height);
     } else {
       this.velocity.y += gravity;
     }
@@ -72,12 +92,28 @@ class Character extends Sprite {
     this.isAttacking = true;
   }
 
-  takeHit() {
-    this.health -= 20;
+  takeHit(damage) {
+    if (this.health > 0) {
+      this.health -= damage;
+    }
     if (this.health <= 0) {
       this.switchSprite('death');
+      this.isAttacking = false;
     } else {
       this.switchSprite('takeHit');
+    }
+  }
+
+  completeLoop(sprite) {
+    if (this.framesCurrent === sprite.framesMax - 1) {
+      if (this.spriteHold >= this.framesHold -1) {
+        return true;
+      } else {
+        this.spriteHold++;
+        return false;
+      }
+    } else {
+      return false;
     }
   }
 
@@ -94,13 +130,16 @@ class Character extends Sprite {
     // Overriding all animations with attack animation
     if (
       this.image === this.sprites.attack1.image &&
-      this.framesCurrent < this.sprites.attack1.framesMax - 1
-    )
+      this.framesCurrent < this.sprites.attack1.framesMax  &&
+      !this.completeLoop(this.sprites.attack1)
+    ) {
       return;
+    }
     // Overriding all animations with take hit animation
     if (
       this.image === this.sprites.takeHit.image &&
-      this.framesCurrent < this.sprites.takeHit.framesMax -1
+      this.framesCurrent < this.sprites.takeHit.framesMax &&
+      !this.completeLoop(this.sprites.takeHit)
     )
       return;
     switch (sprite) {
@@ -137,6 +176,7 @@ class Character extends Sprite {
           this.framesMax = this.sprites.attack1.framesMax;
           this.image = this.sprites.attack1.image;
           this.framesCurrent = 0;
+          this.spriteHold = 0;
         }
         break;
       case "takeHit":
@@ -144,6 +184,7 @@ class Character extends Sprite {
           this.framesMax = this.sprites.takeHit.framesMax;
           this.image = this.sprites.takeHit.image;
           this.framesCurrent = 0;
+          this.spriteHold = 0;
         }
         break;
       case "death":

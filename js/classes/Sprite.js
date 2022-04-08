@@ -26,6 +26,8 @@ class Sprite {
       (this.image.width / this.framesMax) * this.scale, 
       this.image.height * this.scale
     );
+    
+    
   }
 
   update() {
@@ -35,7 +37,6 @@ class Sprite {
 
   animateFrames() {
     this.framesElapsed++;
-
     if (this.framesElapsed % this.framesHold === 0) {
       if (this.framesCurrent < this.framesMax - 1) {
         this.framesCurrent++;      

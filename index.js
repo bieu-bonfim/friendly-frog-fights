@@ -1,5 +1,6 @@
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
+const debug = true;
 
 canvas.width = 1024;
 canvas.height = 576;
@@ -36,9 +37,11 @@ const player = new Character({
     x: 0,
     y: 0
   },
+  width: 70,
+  height: 140,
   offset: {
     x: 215,
-    y: 155
+    y: 165
   },
   imageSrc: './img/samuraiMack/Idle.png',
   framesMax: 8,
@@ -63,9 +66,10 @@ const player = new Character({
     attack1: {
       imageSrc: './img/samuraiMack/Attack1.png',
       framesMax: 6,
+      attackFrame: 4,
     },
     takeHit: {
-      imageSrc: './img/samuraiMack/takeHit.png',
+      imageSrc: './img/samuraiMack/TakeHit.png',
       framesMax: 4,
     },
     death: {
@@ -77,11 +81,18 @@ const player = new Character({
   attackBox: {
     offset: {
       x: 70,
-      y: 50
+      y: 35
     },
     width: 180,
     height: 80
   },
+  stats: {
+    health: 100,
+    speed: 66,
+    damage: 0.1,
+    jump: 50,
+    jumpQuantity: 1
+  }
 });
 
 player.draw();
@@ -91,6 +102,8 @@ const enemy = new Character({
     x: 674, 
     y: 150
   },
+  width: 50,
+  height: 150,
   velocity: {
     x: 0,
     y: 0
@@ -122,9 +135,10 @@ const enemy = new Character({
     attack1: {
       imageSrc: './img/kenji/Attack1.png',
       framesMax: 4,
+      attackFrame: 1,
     },
     takeHit: {
-      imageSrc: './img/kenji/takeHit.png',
+      imageSrc: './img/kenji/TakeHit.png',
       framesMax: 3,
     },
     death: {
@@ -134,12 +148,19 @@ const enemy = new Character({
   },
   attackBox: {
     offset: {
-      x: -180,
+      x: -172,
       y: 50
     },
-    width: 180,
+    width: 172,
     height: 80
   },
+  stats: {
+    health: 100,
+    speed: 66,
+    damage: 0.1,
+    jump: 50,
+    jumpQuantity: 1
+  }
 });
 
 enemy.draw();
@@ -162,6 +183,12 @@ const keys = {
   },
   ArrowUp: {
     pressed: false
+  },
+  space: {
+    pressed: false
+  },
+  Enter: {
+    pressed: false
   }
 };
 
@@ -181,22 +208,26 @@ function animate() {
   if (!player.dead) {
     if (keys.a.pressed == true && player.lastkey == 'a') {
       player.switchSprite('run');
-      player.velocity.x = -3.5;
+      player.velocity.x = -(((player.stats.speed / 100)*3)+1.5);
     } else if (keys.d.pressed == true && player.lastkey == 'd') {
       player.switchSprite('run');
-      player.velocity.x = 3.5;
+      player.velocity.x = (((player.stats.speed / 100)*3)+1.5);
     } else if (keys.d.pressed == true) {
       player.switchSprite('run');
-      player.velocity.x = 3.5;
+      player.velocity.x = (((player.stats.speed / 100)*3)+1.5);
     } else if (keys.a.pressed == true) {
       player.switchSprite('run');
-      player.velocity.x = -3.5;
+      player.velocity.x = -(((player.stats.speed / 100)*3)+1.5);
     } else {
       player.switchSprite('idle');
     }
+
+    if (keys.space.pressed == true) {
+      player.attack();
+    }
   
     if (keys.w.pressed == true && player.velocity.y == 0) {
-      player.velocity.y = -10;
+      player.velocity.y = -(20*player.stats.jump/100);
     }
   
     if (player.velocity.y < 0) {
@@ -224,12 +255,16 @@ function animate() {
     } else if (keys.ArrowLeft.pressed == true) {
       enemy.switchSprite('run');
       enemy.velocity.x = -3.5;
-    }else {
+    } else {
       enemy.switchSprite('idle');
     }
 
+    if (keys.Enter.pressed == true) {
+      enemy.attack();
+    }
+
     if (keys.ArrowUp.pressed == true && enemy.velocity.y == 0) {
-      enemy.velocity.y = -10;
+      enemy.velocity.y = -(20*player.stats.jump/100);
     }
 
     if (enemy.velocity.y < 0) {
@@ -250,10 +285,11 @@ function animate() {
       rectangle2: enemy
     }) &&
     player.isAttacking &&
-    player.framesCurrent === 4
+    player.framesCurrent === player.sprites.attack1.attackFrame
   ) {
-    enemy.takeHit();
+    enemy.takeHit(player.stats.damage);
     player.isAttacking = false;
+    player.switchSprite('idle');
     gsap.to('#enemy-health', {
       width: enemy.health+'%'
     });
@@ -262,7 +298,7 @@ function animate() {
   // Missed
   if (
     player.isAttacking &&
-    player.framesCurrent === 4
+    player.framesCurrent === player.sprites.attack1.attackFrame
   ) {
     player.isAttacking = false;
   }
@@ -274,9 +310,10 @@ function animate() {
       rectangle2: player
     }) &&
     enemy.isAttacking &&
-    enemy.framesCurrent === 2
+    enemy.framesCurrent === enemy.sprites.attack1.attackFrame
   ) {
-    player.takeHit();
+    console.log(enemy.framesCurrent);
+    player.takeHit(enemy.stats.damage);
     enemy.isAttacking = false;
     gsap.to('#player-health', {
       width: player.health+'%'
@@ -287,7 +324,7 @@ function animate() {
 
   if (
     enemy.isAttacking &&
-    enemy.framesCurrent === 2
+    enemy.framesCurrent === enemy.sprites.attack1.attackFrame
   ) {
     enemy.isAttacking = false;
   }
@@ -316,7 +353,7 @@ window.addEventListener('keydown', (e) => {
       keys.w.pressed = true;
       break;
     case ' ':
-      player.attack();
+      keys.space.pressed = true;
       break;
     default:
       break;
@@ -334,13 +371,12 @@ window.addEventListener('keydown', (e) => {
     case 'ArrowUp':
       keys.ArrowUp.pressed = true;
       break;
-    case 'ArrowDown':
-      enemy.attack();
+    case 'Enter':
+      keys.Enter.pressed = true;
       break;
     default:
       break;
   }
-  // console.log(e.key);
 });
 
 window.addEventListener('keyup', (e) => {
@@ -354,6 +390,9 @@ window.addEventListener('keyup', (e) => {
     case 'w':
       keys.w.pressed = false;
       break;
+    case ' ':
+      keys.space.pressed = false;
+      break;
     default:
       break;
   }
@@ -366,6 +405,9 @@ window.addEventListener('keyup', (e) => {
       break;
     case 'ArrowUp':
       keys.ArrowUp.pressed = false;
+      break;
+    case 'Enter':
+      keys.Enter.pressed = false;
       break;
 
     default:
